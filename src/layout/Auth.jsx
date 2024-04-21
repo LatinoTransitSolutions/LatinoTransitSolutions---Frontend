@@ -11,6 +11,10 @@ export default function App() {
     if (localStorage.getItem("auth_token")) {
       navigate("/home")
     }
+
+    if (pathname === "/") {
+      navigate("/login")
+    }
   }, [])
 
   return (

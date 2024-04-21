@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { AES } from "crypto-js"
 import { simpleAxios } from "../utils/axios.js"
@@ -21,16 +21,24 @@ export default function AboutUs() {
   const navigate = useNavigate()
 
   const login = () => {
-    simpleAxios.post("/auth/login", { email, password }).then(({ ok, data }) => {
+    simpleAxios.post("/auth/login", { email, password }).then(({ ok, data, error }) => {
       if (ok) {
         localStorage.setItem("auth_token", AES.encrypt(data.token, TOKEN_ENCRYPT))
         localStorage.setItem("current_session", data.user.id)
         setCurrentUser(data.user)
         navigate("/home")
       } else {
-        setError("There's something wrong")
+        setError(error)
       }
     })
+  }
+
+  const onEnter = (e) => {
+    const key = e.which || e.keyCode
+
+    if (key == 13) {
+      validateFields()
+    }
   }
 
   const validateFields = () => {
@@ -39,11 +47,15 @@ export default function AboutUs() {
     if (!email) {
       setErrorEmail("Email is required")
       hasError = true
+    } else {
+      setErrorEmail(null)
     }
 
     if (!password) {
       setErrorPassword("Password is required")
       hasError = true
+    } else {
+      setErrorPassword(null)
     }
 
     if (!hasError) {
@@ -60,8 +72,8 @@ export default function AboutUs() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <Input label="Email" placeholder="m@example.com" error={errorEmail} onUpdateValue={setEmail} type="email"></Input>
-          <Input label="Password" placeholder="**********" error={errorPassword} onUpdateValue={setPassword} type="password"></Input>
+          <Input onKeyDown={onEnter} label="Email" placeholder="m@example.com" error={errorEmail} onUpdateValue={setEmail} type="email"></Input>
+          <Input onKeyDown={onEnter} label="Password" placeholder="**********" error={errorPassword} onUpdateValue={setPassword} type="password"></Input>
 
           {error ? <span className="text-negative-100 text-center h-6 block">{error}</span> : null}
         </div>
